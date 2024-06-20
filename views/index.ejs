@@ -2,15 +2,14 @@
 <html>
 <head>
     <title>Guestbook</title>
-    <link rel="stylesheet" type="text/css" href="/styles.css">
 </head>
 <body>
     <header>
-        <div class="container">
+        <div>
             <h1>Guestbook</h1>
         </div>
     </header>
-    <div class="container main">
+    <div>
         <form action="/post" method="post" enctype="multipart/form-data">
             <input type="text" name="username" placeholder="Your Name (optional)">
             <textarea name="review" placeholder="Write your review here..." required></textarea>
@@ -20,7 +19,8 @@
         <ul>
             <% reviews.forEach(review => { %>
                 <li>
-                    <p><strong><%= review.Username ? review.Username._ : 'Anonymous' %>:</strong> <%= review.Text._ %></p>
+                    <p><strong><%= review.Username ? review.Username._ : 'Anonymous' %>:</strong></p>
+                    <p><%= review.Text._ %></p>
                     <% if (review.ThumbnailUrl._) { %>
                         <img src="<%= review.ThumbnailUrl._ %>" alt="thumbnail"/>
                     <% } %>
