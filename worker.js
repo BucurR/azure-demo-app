@@ -3,6 +3,7 @@ import { createBlobService, createQueueService, createTableService, TableUtiliti
 import Jimp from 'jimp';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { generateBlobSASQueryParameters, BlobSASPermissions, StorageSharedKeyCredential } from '@azure/storage-blob';
 
 // Load environment variables from .env file
 config();
@@ -14,6 +15,22 @@ const tableService = createTableService(process.env.AZURE_STORAGE_ACCOUNT, proce
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const accountName = process.env.AZURE_STORAGE_ACCOUNT;
+const accountKey = process.env.STORAGE_KEY;
+
+function generateSASToken(containerName, blobName) {
+    const sharedKeyCredential = new StorageSharedKeyCredential(accountName, accountKey);
+    const sasOptions = {
+        containerName,
+        blobName,
+        permissions: BlobSASPermissions.parse("r"), // Read permission
+        expiresOn: new Date(new Date().valueOf() + 86400 * 1000) // 1 day expiration
+    };
+
+    const sasToken = generateBlobSASQueryParameters(sasOptions, sharedKeyCredential).toString();
+    return `https://${accountName}.blob.core.windows.net/${containerName}/${blobName}?${sasToken}`;
+}
 
 function processQueue() {
     queueService.getMessages('resize-queue', { numofmessages: 1, visibilitytimeout: 30 }, (error, result, response) => {
@@ -42,8 +59,11 @@ function processQueue() {
                                 if (!error) {
                                     console.log(`Uploaded thumbnail as: ${thumbnailName}`);
 
+                                    // Generate SAS token for the thumbnail
+                                    const thumbnailUrl = generateSASToken('thumbnails', thumbnailName);
+                                    console.log(`Thumbnail URL with SAS: ${thumbnailUrl}`);
+
                                     // Update the table with the thumbnail URL
-                                    const thumbnailUrl = blobService.getUrl('thumbnails', thumbnailName);
                                     const entGen = TableUtilities.entityGenerator;
                                     const updateEntity = {
                                         PartitionKey: entGen.String('review'),
