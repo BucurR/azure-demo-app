@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Guestbook</title>
+    <link rel="stylesheet" type="text/css" href="public/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Guestbook</h1>
+        </div>
+    </header>
+    <div class="container main">
+        <form action="/post" method="post" enctype="multipart/form-data">
+            <input type="text" name="username" placeholder="Your Name (optional)">
+            <textarea name="review" placeholder="Write your review here..." required></textarea>
+            <input type="file" name="image">
+            <button type="submit">Post</button>
+        </form>
+        <ul>
+            <% reviews.forEach(review => { %>
+                <li>
+                    <p><strong><%= review.Username ? review.Username._ : 'Anonymous' %>:</strong> <%= review.Text._ %></p>
+                    <% if (review.ThumbnailUrl._) { %>
+                        <img src="<%= review.ThumbnailUrl._ %>" alt="thumbnail"/>
+                    <% } %>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+</body>
+</html>
